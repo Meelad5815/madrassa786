@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="100%" height="100%" fill="#f7f9fb" />
+  <text x="40" y="40" font-size="22" font-family="Arial" fill="#0b4d6c">Students — طلبہ</text>
+  <rect x="40" y="70" width="1120" height="70" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="60" y="100" font-size="14">Actions: نیا طالبعلم | تلاش | مطالعہ فلٹر | حالت فلٹر | کلاس | سال | قاری</text>
+
+  <rect x="40" y="160" width="1120" height="520" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="60" y="190" font-size="14">Table: نام | والد | مطالعہ | حالت | کلاس | قاری | عمل</text>
+
+  <rect x="40" y="690" width="1120" height="60" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="60" y="725" font-size="14">Pagination | CSV export | bulk actions</text>
+
+  <text x="60" y="760" font-size="12" fill="#6b7280">Notes: Server-side pagination, filters are applied on query to reduce payloads.</text>
+</svg>

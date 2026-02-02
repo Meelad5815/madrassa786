@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="100%" height="100%" fill="#f7f9fb" />
+  <text x="40" y="40" font-size="20" font-family="Arial" fill="#0b4d6c">Add Student — طالبعلم شامل کریں</text>
+  <rect x="40" y="70" width="720" height="880" fill="#fff" stroke="#e6eef4" rx="8" />
+
+  <text x="60" y="110" font-size="14">Basic Information</text>
+  <rect x="60" y="130" width="320" height="44" fill="#fff" stroke="#e6eef4" rx="6" />
+  <text x="380" y="110" font-size="14">Study Details</text>
+  <rect x="380" y="130" width="320" height="44" fill="#fff" stroke="#e6eef4" rx="6" />
+
+  <text x="60" y="190" font-size="13">• نام</text>
+  <text x="60" y="230" font-size="13">• والد کا نام</text>
+  <text x="60" y="270" font-size="13">• تاریخِ پیدائش</text>
+  <text x="60" y="310" font-size="13">• تاریخِ داخلہ</text>
+  <text x="60" y="350" font-size="13">• مطالعہ کی قسم</text>
+  <text x="60" y="390" font-size="13">• قاری منتخب کریں</text>
+  <text x="60" y="430" font-size="13">• موجودہ کلاس</text>
+  <text x="60" y="470" font-size="13">• پروگریس (پارے)</text>
+  <rect x="60" y="520" width="160" height="44" fill="#0b4d6c" rx="6" />
+  <text x="118" y="548" font-size="14" fill="#fff">محفوظ کریں</text>
+
+  <text x="60" y="580" font-size="12" fill="#6b7280">Form validation: required fields marked and inline error messages in Urdu</text>
+</svg>

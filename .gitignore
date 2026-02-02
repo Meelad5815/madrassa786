@@ -1,0 +1,34 @@
+# Node / dependency folders
+node_modules/
+.vite/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Local storage for mock data (optional)
+madrasa_mock_v1
+
+# Misc
+*.gz

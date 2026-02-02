@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="100%" height="100%" fill="#f7f9fb" />
+  <text x="40" y="40" font-size="20" font-family="Arial">Dashboard (ڈیش بورڈ)</text>
+  <rect x="40" y="60" width="700" height="90" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="60" y="90" font-size="14">Metric Cards: کل طلبہ | فعال طلبہ | مکمل حافظ | فعال معلم</text>
+  <rect x="40" y="170" width="460" height="300" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="60" y="190" font-size="14">حالیہ طلبہ (Table)</text>
+  <rect x="520" y="170" width="220" height="300" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="540" y="190" font-size="14">حالیہ سرگرمیاں</text>
+  <rect x="40" y="490" width="700" height="60" fill="#fff" stroke="#e6eef4" rx="8" />
+  <text x="60" y="528" font-size="14">Quick Actions: طالبعلم شامل کریں | قاری شامل کریں | حاضری لگائیں</text>
+</svg>
