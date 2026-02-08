@@ -10,6 +10,7 @@ A React + Vite OSINT dashboard that fetches public data from web APIs and displa
 - Domain fetch (RDAP)
 - Email checks (PingUtil + Kickbox disposable)
 - Phone lookup (public phone geo API where available)
+- Phone number "Track by Number" returns only approximate country hints, not exact live tracking
 - IP lookup (ipapi.co)
 - Browser geolocation for current device (with permission)
 - Case notes copy/clear workflow
@@ -18,6 +19,7 @@ A React + Vite OSINT dashboard that fetches public data from web APIs and displa
 
 - Some APIs may fail due to CORS, rate limits, or network restrictions.
 - CNIC/SIM owner private databases are not integrated.
+- Exact live tracking from a phone number is not provided; lawful telecom channels are required.
 
 ## Run locally
 

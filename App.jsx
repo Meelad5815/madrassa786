@@ -10,6 +10,15 @@ function makeUsernameVariants(value) {
   return [...variants].filter(Boolean).slice(0, 20);
 }
 
+
+function approximatePhoneArea(digits) {
+  if (!digits) return { capability: "Unavailable", reason: "No number provided" };
+  if (digits.startsWith("92")) return { capability: "Approx only", country: "Pakistan", area: "Unknown without telecom records" };
+  if (digits.startsWith("91")) return { capability: "Approx only", country: "India", area: "Unknown without telecom records" };
+  if (digits.startsWith("1")) return { capability: "Approx only", country: "US/Canada", area: "Unknown without telecom records" };
+  return { capability: "Approx only", country: "Unknown", area: "Unknown without telecom records" };
+}
+
 function InfoGrid({ title, data }) {
   if (!data || Object.keys(data).length === 0) return null;
   return (
@@ -121,6 +130,20 @@ export default function App() {
     }
   };
 
+  const trackPhoneLocation = () => {
+    if (!phone.trim()) return;
+    const digits = phone.replace(/\D/g, "");
+    const approx = approximatePhoneArea(digits);
+    setPhoneWeb((prev) => ({
+      ...(prev || {}),
+      trackingResult: "Exact live tracking by phone number is not available in this app.",
+      approximateCountry: approx.country,
+      approximateArea: approx.area,
+      legalPath: "Use authorized telecom/law-enforcement channels for lawful requests.",
+    }));
+    setStatus("Phone tracking request handled with legal-safe response.");
+  };
+
   const fetchPhoneData = async () => {
     if (!phone.trim()) return;
     setStatus("Fetching phone data...");
@@ -221,6 +244,7 @@ export default function App() {
           <button type="button" onClick={() => setPhoneStep((s) => Math.min(3, s + 1))}>Next</button>
           <button type="button" className="secondary" onClick={() => setPhoneStep(1)}>Reset Steps</button>
           <button type="button" onClick={fetchPhoneData}>Fetch Phone Data</button>
+          <button type="button" className="secondary" onClick={trackPhoneLocation}>Track by Number</button>
         </div>
         <p className="muted">Current Step: {phoneStep} / 3</p>
         {phoneStep >= 2 && <InfoGrid title="Phone Web Results" data={phoneWeb} />}
