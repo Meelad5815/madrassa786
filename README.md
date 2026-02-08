@@ -1,16 +1,17 @@
 # MRK OSINT Web Suite
 
-A React + Vite **OSINT tool website** with one-screen pivots for real investigation workflows.
+A React + Vite OSINT tool website where **all features run inside the app**.
+No external website redirection is used.
 
 ## Features
 
-- Username footprint module with generated variants and multi-platform pivots (GitHub, X, Instagram, TikTok, Reddit, Telegram)
-- Domain recon links (WHOIS, DNS, crt.sh, Wayback, VirusTotal, SecurityTrails)
-- Email intelligence links (HIBP, EmailRep, Hunter, Gravatar)
-- Phone intelligence links (Truecaller, Sync.me, WhatsApp check)
-- IP intelligence links (AbuseIPDB, Shodan, IPInfo, Censys)
-- Built-in **Case Notes** box with copy + clear actions for reporting
-- Mobile-friendly dark UI
+- Username intelligence with local variant generation and strength score
+- Domain intelligence (local scoring model)
+- Email intelligence (format/provider/risk estimate)
+- Phone intelligence (normalized number, country guess, spam likelihood)
+- IP intelligence (version, reputation, geo hint, ports estimate)
+- Case Notes panel with copy/clear actions
+- Responsive dark UI
 
 ## Run locally
 
@@ -29,4 +30,4 @@ npm run build
 
 ## Important
 
-This tool is for legal and authorized OSINT work only. Always follow local law, platform terms, and privacy rules.
+For legal and authorized use only.

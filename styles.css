@@ -140,3 +140,43 @@ button.secondary {
     flex-direction: column;
   }
 }
+
+
+.info-block {
+  margin-top: 10px;
+}
+
+.info-block h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #d0dcff;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.result-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(13, 22, 46, 0.65);
+  display: grid;
+  gap: 4px;
+}
+
+.result-item strong {
+  text-transform: capitalize;
+  font-size: 12px;
+  color: #b8c9f3;
+}
+
+.result-item span {
+  font-size: 14px;
+}
+
+.variant-row small {
+  color: #a8b8dd;
+}
