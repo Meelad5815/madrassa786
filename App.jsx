@@ -129,7 +129,7 @@ export default function App() {
         <p className="tag">OSINT Toolkit</p>
         <h1>MRK OSINT Web Suite (Safe Mode)</h1>
         <p className="muted">All modules run inside this app. No illegal tracking or private database access.</p>
-        <div className="alert">Authorized and legal use only.</div>
+        <div className="alert">For educational purpose only. Authorized and legal use only.</div>
       </section>
 
       <section className="card section">

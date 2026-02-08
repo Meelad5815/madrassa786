@@ -2,6 +2,8 @@
 
 A React + Vite OSINT tool website where all features run inside the app.
 
+> For educational purpose only.
+
 ## What this app does
 
 - Username intelligence with local variant generation and scoring
@@ -31,3 +33,8 @@ npm run dev
 ```bash
 npm run build
 ```
+
+
+## Disclaimer
+
+For educational purpose only. Use only with lawful authorization.
