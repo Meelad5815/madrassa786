@@ -10,59 +10,8 @@ function makeUsernameVariants(value) {
   return [...variants].filter(Boolean).slice(0, 20);
 }
 
-function scoreFromText(text) {
-  return [...text].reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % 100;
-}
-
-function domainIntel(domain) {
-  if (!domain.trim()) return null;
-  const clean = domain.trim().toLowerCase();
-  const score = scoreFromText(clean);
-  return {
-    tld: clean.split(".").pop() || "unknown",
-    risk: score > 70 ? "High" : score > 40 ? "Medium" : "Low",
-    dnsHealth: score % 2 === 0 ? "Stable" : "Inconsistent",
-    likelyProvider: ["Cloud", "Managed VPS", "Self-hosted"][score % 3],
-  };
-}
-
-function emailIntel(email) {
-  if (!email.trim()) return null;
-  const clean = email.trim().toLowerCase();
-  const score = scoreFromText(clean);
-  return {
-    provider: clean.split("@")[1] || "unknown",
-    breachRisk: score > 65 ? "Elevated" : "Normal",
-    formatValid: /^\S+@\S+\.\S+$/.test(clean) ? "Valid pattern" : "Invalid pattern",
-    confidence: `${50 + (score % 50)}%`,
-  };
-}
-
-function phoneIntel(phone) {
-  if (!phone.trim()) return null;
-  const digits = phone.replace(/\D/g, "");
-  const score = scoreFromText(digits);
-  return {
-    normalized: digits,
-    countryGuess: digits.startsWith("92") ? "Pakistan" : digits.startsWith("1") ? "US/CA" : "Unknown",
-    lineType: score % 2 === 0 ? "Mobile" : "Unknown/VoIP",
-    spamLikelihood: score > 60 ? "Possible" : "Low",
-    note: "No CNIC/name/SIM-owner data is accessed in this app.",
-  };
-}
-
-function ipIntel(ip) {
-  if (!ip.trim()) return null;
-  const score = scoreFromText(ip);
-  return {
-    version: ip.includes(":") ? "IPv6" : "IPv4",
-    reputation: score > 75 ? "Suspicious" : score > 45 ? "Monitor" : "Clean",
-    geoHint: ["South Asia", "Europe", "North America", "Middle East"][score % 4],
-  };
-}
-
 function InfoGrid({ title, data }) {
-  if (!data) return null;
+  if (!data || Object.keys(data).length === 0) return null;
   return (
     <div className="info-block">
       <h3>{title}</h3>
@@ -70,12 +19,18 @@ function InfoGrid({ title, data }) {
         {Object.entries(data).map(([key, value]) => (
           <div className="result-item" key={key}>
             <strong>{key}</strong>
-            <span>{value}</span>
+            <span>{String(value)}</span>
           </div>
         ))}
       </div>
     </div>
   );
+}
+
+async function fetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
 export default function App() {
@@ -84,16 +39,20 @@ export default function App() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [ip, setIp] = useState("");
+
+  const [usernameWeb, setUsernameWeb] = useState(null);
+  const [domainWeb, setDomainWeb] = useState(null);
+  const [emailWeb, setEmailWeb] = useState(null);
+  const [phoneWeb, setPhoneWeb] = useState(null);
+  const [ipWeb, setIpWeb] = useState(null);
+  const [status, setStatus] = useState("");
+
   const [notes, setNotes] = useState("");
   const [phoneStep, setPhoneStep] = useState(1);
   const [location, setLocation] = useState(null);
   const [locError, setLocError] = useState("");
 
   const usernameVariants = useMemo(() => makeUsernameVariants(username), [username]);
-  const dIntel = useMemo(() => domainIntel(domain), [domain]);
-  const eIntel = useMemo(() => emailIntel(email), [email]);
-  const pIntel = useMemo(() => phoneIntel(phone), [phone]);
-  const iIntel = useMemo(() => ipIntel(ip), [ip]);
 
   const copyNotes = async () => {
     try {
@@ -103,12 +62,107 @@ export default function App() {
     }
   };
 
+  const fetchUsernameData = async () => {
+    if (!username.trim()) return;
+    setStatus("Fetching username data...");
+    try {
+      const data = await fetchJson(`https://api.github.com/users/${username.trim()}`);
+      setUsernameWeb({
+        source: "GitHub API",
+        login: data.login,
+        name: data.name || "N/A",
+        followers: data.followers,
+        following: data.following,
+        publicRepos: data.public_repos,
+        location: data.location || "N/A",
+      });
+      setStatus("Username data loaded.");
+    } catch (e) {
+      setStatus(`Username fetch failed: ${e.message}`);
+    }
+  };
+
+  const fetchDomainData = async () => {
+    if (!domain.trim()) return;
+    setStatus("Fetching domain data...");
+    try {
+      const data = await fetchJson(`https://rdap.org/domain/${domain.trim()}`);
+      setDomainWeb({
+        source: "RDAP",
+        ldhName: data.ldhName || "N/A",
+        handle: data.handle || "N/A",
+        status: Array.isArray(data.status) ? data.status.join(", ") : "N/A",
+        nameservers: Array.isArray(data.nameservers) ? data.nameservers.length : 0,
+      });
+      setStatus("Domain data loaded.");
+    } catch (e) {
+      setStatus(`Domain fetch failed: ${e.message}`);
+    }
+  };
+
+  const fetchEmailData = async () => {
+    if (!email.trim()) return;
+    setStatus("Fetching email data...");
+    try {
+      const [verify, disposable] = await Promise.all([
+        fetchJson(`https://api.eva.pingutil.com/email?email=${encodeURIComponent(email.trim())}`),
+        fetchJson(`https://open.kickbox.com/v2/disposable/${encodeURIComponent(email.trim())}`),
+      ]);
+      setEmailWeb({
+        source: "PingUtil + Kickbox",
+        validSyntax: verify?.data?.valid_syntax,
+        deliverable: verify?.data?.deliverable,
+        domain: verify?.data?.domain || "N/A",
+        disposable: disposable?.disposable,
+      });
+      setStatus("Email data loaded.");
+    } catch (e) {
+      setStatus(`Email fetch failed: ${e.message}`);
+    }
+  };
+
+  const fetchPhoneData = async () => {
+    if (!phone.trim()) return;
+    setStatus("Fetching phone data...");
+    const digits = phone.replace(/\D/g, "");
+    try {
+      const data = await fetchJson(`https://htmlweb.ru/geo/api.php?json&telcod=${digits}`);
+      setPhoneWeb({
+        source: "htmlweb phone geo",
+        normalized: digits,
+        country: data?.country?.name || "N/A",
+        region: data?.region?.name || "N/A",
+        operator: data?.["0"]?.oper || data?.oper || "N/A",
+      });
+      setStatus("Phone data loaded.");
+    } catch (e) {
+      setPhoneWeb({ source: "Web API", normalized: digits, note: "Public phone API unavailable in this environment." });
+      setStatus(`Phone fetch limited: ${e.message}`);
+    }
+  };
+
+  const fetchIpData = async () => {
+    if (!ip.trim()) return;
+    setStatus("Fetching IP data...");
+    try {
+      const data = await fetchJson(`https://ipapi.co/${ip.trim()}/json/`);
+      setIpWeb({
+        source: "ipapi.co",
+        ip: data.ip,
+        city: data.city || "N/A",
+        region: data.region || "N/A",
+        country: data.country_name || "N/A",
+        org: data.org || "N/A",
+      });
+      setStatus("IP data loaded.");
+    } catch (e) {
+      setStatus(`IP fetch failed: ${e.message}`);
+    }
+  };
+
   const getCurrentLocation = () => {
     setLocError("");
-    if (!navigator.geolocation) {
-      setLocError("Geolocation is not supported in this browser.");
-      return;
-    }
+    if (!navigator.geolocation) return setLocError("Geolocation is not supported in this browser.");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLocation({
@@ -127,35 +181,36 @@ export default function App() {
     <main className="osint-page">
       <section className="card hero">
         <p className="tag">OSINT Toolkit</p>
-        <h1>MRK OSINT Web Suite (Safe Mode)</h1>
-        <p className="muted">All modules run inside this app. No illegal tracking or private database access.</p>
+        <h1>MRK OSINT Web Suite (Web Fetch Mode)</h1>
+        <p className="muted">Fetches public OSINT data from web APIs directly inside your website.</p>
         <div className="alert">For educational purpose only. Authorized and legal use only.</div>
+        {status && <p className="muted">{status}</p>}
       </section>
 
       <section className="card section">
         <h2>1) Username Intelligence</h2>
-        <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. meelad786" />
-        <div className="stack">
-          {usernameVariants.length === 0 && <p className="muted">Enter a handle to generate internal results.</p>}
-          {usernameVariants.map((handle) => (
-            <div key={handle} className="variant-row">
-              <span>@{handle}</span>
-              <small>Strength Score: {scoreFromText(handle)} / 100</small>
-            </div>
-          ))}
+        <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. octocat" />
+        <div className="actions">
+          <button type="button" onClick={fetchUsernameData}>Fetch Username Data</button>
         </div>
+        <div className="stack">
+          {usernameVariants.map((handle) => <div key={handle} className="variant-row"><span>@{handle}</span></div>)}
+        </div>
+        <InfoGrid title="Username Web Results" data={usernameWeb} />
       </section>
 
       <section className="card section grid-2">
         <div>
           <h2>2) Domain Intelligence</h2>
           <input value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="example.com" />
-          <InfoGrid title="Internal Domain Analysis" data={dIntel} />
+          <div className="actions"><button type="button" onClick={fetchDomainData}>Fetch Domain Data</button></div>
+          <InfoGrid title="Domain Web Results" data={domainWeb} />
         </div>
         <div>
           <h2>3) Email Intelligence</h2>
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="target@domain.com" />
-          <InfoGrid title="Internal Email Analysis" data={eIntel} />
+          <div className="actions"><button type="button" onClick={fetchEmailData}>Fetch Email Data</button></div>
+          <InfoGrid title="Email Web Results" data={emailWeb} />
         </div>
       </section>
 
@@ -165,25 +220,19 @@ export default function App() {
         <div className="actions">
           <button type="button" onClick={() => setPhoneStep((s) => Math.min(3, s + 1))}>Next</button>
           <button type="button" className="secondary" onClick={() => setPhoneStep(1)}>Reset Steps</button>
+          <button type="button" onClick={fetchPhoneData}>Fetch Phone Data</button>
         </div>
         <p className="muted">Current Step: {phoneStep} / 3</p>
-        {phoneStep >= 2 && <InfoGrid title="Internal Phone Analysis" data={pIntel} />}
-        {phoneStep >= 3 && (
-          <div className="info-block">
-            <h3>Compliance Notice</h3>
-            <p className="muted">
-              CNIC owner identity, SIM owner records, or live third-party location tracking are not supported.
-              Use official telecom/government channels with legal authorization.
-            </p>
-          </div>
-        )}
+        {phoneStep >= 2 && <InfoGrid title="Phone Web Results" data={phoneWeb} />}
+        {phoneStep >= 3 && <p className="muted">CNIC/SIM ownership data is not provided by this app.</p>}
       </section>
 
       <section className="card section grid-2">
         <div>
           <h2>5) IP Intelligence</h2>
           <input value={ip} onChange={(e) => setIp(e.target.value)} placeholder="8.8.8.8" />
-          <InfoGrid title="Internal IP Analysis" data={iIntel} />
+          <div className="actions"><button type="button" onClick={fetchIpData}>Fetch IP Data</button></div>
+          <InfoGrid title="IP Web Results" data={ipWeb} />
         </div>
         <div>
           <h2>6) Location (Your Device, with Permission)</h2>
@@ -195,7 +244,6 @@ export default function App() {
 
       <section className="card section">
         <h2>Case Notes</h2>
-        <p className="muted">Write findings and copy into your report.</p>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
