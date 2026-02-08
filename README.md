@@ -1,59 +1,40 @@
-# Madrasa Admin UI (Mocked Frontend)
+# MRK OSINT Web Suite
 
-یہ ایک React (Vite) based Admin Panel skeleton ہے — Firebase کے بغیر۔ backend کے بجائے ایک mock service (localStorage) استعمال کیا گیا ہے تاکہ آپ جلدی frontend چلا کر UI کا flow دیکھ سکیں۔
+A React + Vite OSINT dashboard that fetches public data from web APIs and displays it inside your website.
 
-Quick Start:
-1. Node.js اور npm انسٹال کریں
-2. فولڈر میں:
-   - `npm install`
-   - `npm run dev`
-3. براؤزر میں کھول��ں: `http://localhost:5173`
+> For educational purpose only.
 
-Project structure (اہم):
-- src/
-  - main.jsx
-  - App.jsx
-  - services/mockService.js   (mock backend)
-  - components/Sidebar.jsx
-  - components/Topbar.jsx
-  - pages/... (Dashboard, Students, Teachers, Attendance, ...)
+## Features
 
-Notes:
-- تمام لیبلز اردو میں ہیں (جہاں مناسب)
-- mockService کے methods future میں Firebase service کے ساتھ آسانی سے replace کیے جا سکتے ہیں
-- مزید صفحات یا fields شامل کرنے کے لیے pages فولڈر میں نئے components بنائیں
+- Username fetch (GitHub public API)
+- Domain fetch (RDAP)
+- Email checks (PingUtil + Kickbox disposable)
+- Phone lookup (public phone geo API where available)
+- Phone provider connectors with API key:
+  - Veriphone
+  - AbstractAPI Phone Validation
+  - Truecaller/etc website mode guidance
+- Phone number "Track by Number" returns only approximate country hints, not exact live tracking
+- IP lookup (ipapi.co)
+- Browser geolocation for current device (with permission)
+- Case notes copy/clear workflow
 
-Implemented features (as of Feb 3, 2026):
-- Dashboard: Metric cards, recent students list, quick actions
-- Students: List with search, filters, server-side pagination, CSV export, edit & delete
-- Add/Edit Student: Reusable `StudentForm` with validation hints
-- Attendance: Daily marking, bulk present/absent, toast confirmation, **Monthly Reports** with CSV export and printable PDF view
-- Toast system for user feedback
-- Authentication (Login / Register) with mock users — Admin role enabled
-- Password hashing (SHA-256 via Web Crypto), password reset (mock tokens)
-- Admin Users & Roles management page
-- Google Sign-In (client-side) — configure Client ID in Settings to enable
-- Low-fi and Hi-fi wireframes in `assets/wireframes/`
+## Notes
 
-Next steps: wireframes refinement, Students list advanced filters (server-side), Attendance reports charts and PDF generator (optional jsPDF)
+- Some APIs may fail due to CORS, rate limits, invalid API keys, or network restrictions.
+- Truecaller and similar websites generally block direct client-side scraping/fetch due to auth/CORS protections.
+- CNIC/SIM owner private databases are not integrated.
+- Exact live tracking from a phone number is not provided; lawful telecom channels are required.
 
-Server integration (Express) — quick guide:
-- A small Express auth server has been scaffolded in `server/` with endpoints:
-  - `POST /api/auth/register`  {email,password,name}
-  - `POST /api/auth/login`     {email,password}
-  - `POST /api/auth/google`    {idToken}
-  - `POST /api/auth/request-password-reset` {email} -> returns `{ ok: true, preview }` where `preview` is an Ethereal message URL in dev
-  - `POST /api/auth/reset-password` {token,password}
-- Run it:
-  - cd server
-  - npm install
-  - copy `.env.example` to `.env` and set `JWT_SECRET` and optionally `GOOGLE_CLIENT_ID` and SMTP settings
-  - npm run dev
-- To make the frontend use the server: create a `.env` in project root with `VITE_API_URL=http://localhost:4000` (Vite uses `VITE_` prefix)
+## Run locally
 
-Notes:
-- Disk-space warning occurred during install (ENOSPC) so the server uses a lightweight JSON file store (`server/data.json`) instead of SQLite for now (no added native deps required).
-- The server will send password reset messages via Ethereal by default and return a `preview` link in the API response.
+```bash
+npm install
+npm run dev
+```
 
+## Build
 
-اللہ آپ کے کام میں برکت دے 🤲
+```bash
+npm run build
+```
