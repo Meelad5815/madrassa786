@@ -1,49 +1,73 @@
 import React, { useMemo, useState } from "react";
 
-const quickTools = [
-  {
-    title: "Username Footprint",
-    description: "Generate likely handles and quickly pivot to major platforms.",
-  },
-  {
-    title: "Domain Recon",
-    description: "Build fast links for WHOIS, DNS, SSL certificate and archive checks.",
-  },
-  {
-    title: "Email Intel",
-    description: "Prepare breach, gravatar and verification pivots in one click.",
-  },
-  {
-    title: "IP & Infrastructure",
-    description: "Open reputation and geolocation resources for an IP address.",
-  },
+const platformTemplates = [
+  { label: "GitHub", url: (u) => `https://github.com/${u}` },
+  { label: "X/Twitter", url: (u) => `https://x.com/${u}` },
+  { label: "Instagram", url: (u) => `https://instagram.com/${u}` },
+  { label: "TikTok", url: (u) => `https://www.tiktok.com/@${u}` },
+  { label: "Reddit", url: (u) => `https://www.reddit.com/user/${u}` },
+  { label: "Telegram", url: (u) => `https://t.me/${u}` },
 ];
 
-function makeUsernameVariants(input) {
-  const clean = input.trim().toLowerCase().replace(/\s+/g, "");
-  if (!clean) return [];
+const domainPivots = [
+  { label: "WHOIS", url: (d) => `https://who.is/whois/${d}` },
+  { label: "DNS Records", url: (d) => `https://dnschecker.org/all-dns-records-of-domain.php?query=${d}` },
+  { label: "crt.sh", url: (d) => `https://crt.sh/?q=${d}` },
+  { label: "Wayback", url: (d) => `https://web.archive.org/web/*/${d}` },
+  { label: "VirusTotal", url: (d) => `https://www.virustotal.com/gui/domain/${d}` },
+  { label: "SecurityTrails", url: (d) => `https://securitytrails.com/domain/${d}` },
+];
+
+const emailPivots = [
+  { label: "HIBP", url: (e) => `https://haveibeenpwned.com/unifiedsearch/${e}` },
+  { label: "Email Rep", url: (e) => `https://emailrep.io/${e}` },
+  { label: "Hunter", url: (e) => `https://hunter.io/email-verifier/${e}` },
+  { label: "Gravatar", url: (e) => `https://www.gravatar.com/avatar/${encodeURIComponent(e)}` },
+];
+
+const phonePivots = [
+  { label: "Truecaller", url: (p) => `https://www.truecaller.com/search/pk/${p}` },
+  { label: "Sync.me", url: (p) => `https://sync.me/search/?number=${p}` },
+  { label: "WhatsApp check", url: (p) => `https://wa.me/${p.replace(/[^\d]/g, "")}` },
+];
+
+const ipPivots = [
+  { label: "AbuseIPDB", url: (ip) => `https://www.abuseipdb.com/check/${ip}` },
+  { label: "Shodan", url: (ip) => `https://www.shodan.io/host/${ip}` },
+  { label: "IPInfo", url: (ip) => `https://ipinfo.io/${ip}` },
+  { label: "Censys", url: (ip) => `https://search.censys.io/hosts/${ip}` },
+];
+
+function makeUsernameVariants(value) {
+  const base = value.trim().toLowerCase().replace(/\s+/g, "");
+  if (!base) return [];
 
   const separators = ["", ".", "_", "-"];
-  const years = ["", "786", "123", "24", "2026"];
-  const variants = new Set();
+  const postfixes = ["", "786", "007", "pk", "real", "official", "2026"];
+  const variants = new Set([base, base.replace(/[aeiou]/g, ""), base.split("").reverse().join("")]);
 
   separators.forEach((sep) => {
-    years.forEach((year) => {
-      variants.add(`${clean}${sep}${year}`.replace(/[._-]$/, ""));
+    postfixes.forEach((postfix) => {
+      variants.add(`${base}${sep}${postfix}`.replace(/[._-]$/, ""));
     });
   });
 
-  variants.add(clean.replace(/[aeiou]/g, ""));
-  variants.add(clean.split("").reverse().join(""));
-
-  return [...variants].filter(Boolean).slice(0, 24);
+  return [...variants].filter(Boolean).slice(0, 30);
 }
 
-function ExternalLink({ href, label }) {
+function PivotChips({ items, value }) {
+  if (!value.trim()) {
+    return <p className="muted">Type a value to enable pivot links.</p>;
+  }
+
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="chip">
-      {label}
-    </a>
+    <div className="chip-wrap">
+      {items.map((item) => (
+        <a key={item.label} className="chip" href={item.url(value.trim())} target="_blank" rel="noreferrer">
+          {item.label}
+        </a>
+      ))}
+    </div>
   );
 }
 
@@ -53,111 +77,93 @@ export default function App() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [ip, setIp] = useState("");
+  const [notes, setNotes] = useState("");
 
   const usernameVariants = useMemo(() => makeUsernameVariants(username), [username]);
 
+  const copyNotes = async () => {
+    try {
+      await navigator.clipboard.writeText(notes);
+    } catch {
+      // no-op: clipboard might be restricted in browser privacy contexts
+    }
+  };
+
   return (
     <main className="osint-page">
-      <section className="hero card">
+      <section className="card hero">
         <p className="tag">OSINT Toolkit</p>
         <h1>MRK OSINT Web Suite</h1>
-        <p>
-          Ethical intelligence toolkit for investigators, journalists, cyber learners, and SOC teams.
-          Use only with legal authorization.
+        <p className="muted">
+          Fast, legal-first recon dashboard for username, domain, email, phone and IP intelligence.
         </p>
-        <div className="tool-grid">
-          {quickTools.map((tool) => (
-            <article key={tool.title} className="mini-card">
-              <h3>{tool.title}</h3>
-              <p>{tool.description}</p>
-            </article>
-          ))}
-        </div>
+        <div className="alert">Use only for authorized investigations and compliant reporting.</div>
       </section>
 
       <section className="card section">
         <h2>1) Username Footprint</h2>
-        <div className="field-row">
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter name or handle (e.g. meelad786)"
-          />
-        </div>
-        <div className="chip-wrap">
+        <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. meelad786" />
+        <div className="stack">
+          {usernameVariants.length === 0 && <p className="muted">Enter a handle to generate variants.</p>}
           {usernameVariants.map((handle) => (
-            <ExternalLink key={handle} href={`https://github.com/${handle}`} label={`GitHub: ${handle}`} />
+            <div key={handle} className="variant-row">
+              <span>@{handle}</span>
+              <div className="chip-wrap">
+                {platformTemplates.map((platform) => (
+                  <a
+                    key={`${handle}-${platform.label}`}
+                    className="chip"
+                    href={platform.url(handle)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {platform.label}
+                  </a>
+                ))}
+              </div>
+            </div>
           ))}
-          {usernameVariants.length === 0 && <p className="muted">Enter a username to generate variants.</p>}
         </div>
       </section>
 
       <section className="card section">
         <h2>2) Domain Recon</h2>
-        <div className="field-row">
-          <input
-            value={domain}
-            onChange={(e) => setDomain(e.target.value)}
-            placeholder="example.com"
-          />
+        <input value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="example.com" />
+        <PivotChips items={domainPivots} value={domain} />
+      </section>
+
+      <section className="card section grid-2">
+        <div>
+          <h2>3) Email Intel</h2>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="target@domain.com" />
+          <PivotChips items={emailPivots} value={email} />
         </div>
-        <div className="chip-wrap">
-          <ExternalLink href={`https://who.is/whois/${domain}`} label="WHOIS" />
-          <ExternalLink href={`https://dnschecker.org/all-dns-records-of-domain.php?query=${domain}`} label="DNS Records" />
-          <ExternalLink href={`https://crt.sh/?q=${domain}`} label="SSL Certificates" />
-          <ExternalLink href={`https://web.archive.org/web/*/${domain}`} label="Wayback History" />
-          <ExternalLink href={`https://www.virustotal.com/gui/domain/${domain}`} label="VirusTotal" />
+        <div>
+          <h2>4) Phone Intel</h2>
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+923001234567" />
+          <PivotChips items={phonePivots} value={phone} />
         </div>
       </section>
 
       <section className="card section">
-        <h2>3) Email Intelligence</h2>
-        <div className="field-row">
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="target@email.com"
-          />
-        </div>
-        <div className="chip-wrap">
-          <ExternalLink href={`https://haveibeenpwned.com/unifiedsearch/${email}`} label="Breach Check" />
-          <ExternalLink href={`https://www.gravatar.com/${email}`} label="Gravatar Probe" />
-          <ExternalLink href={`https://hunter.io/email-verifier/${email}`} label="Verifier" />
-        </div>
+        <h2>5) IP Intelligence</h2>
+        <input value={ip} onChange={(e) => setIp(e.target.value)} placeholder="8.8.8.8" />
+        <PivotChips items={ipPivots} value={ip} />
       </section>
 
-      <section className="card section split">
-        <div>
-          <h2>4) Phone Intel</h2>
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+923001234567"
-          />
-          <div className="chip-wrap">
-            <ExternalLink href={`https://www.truecaller.com/search/pk/${phone}`} label="Truecaller" />
-            <ExternalLink href={`https://sync.me/search/?number=${phone}`} label="Sync.me" />
-          </div>
+      <section className="card section">
+        <h2>Case Notes</h2>
+        <p className="muted">Store timestamps, observed links and confidence scores while investigating.</p>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={6}
+          placeholder="[UTC time] - Finding - Source URL - Confidence"
+        />
+        <div className="actions">
+          <button type="button" onClick={copyNotes}>Copy Notes</button>
+          <button type="button" onClick={() => setNotes("")} className="secondary">Clear</button>
         </div>
-        <div>
-          <h2>5) IP Intelligence</h2>
-          <input value={ip} onChange={(e) => setIp(e.target.value)} placeholder="8.8.8.8" />
-          <div className="chip-wrap">
-            <ExternalLink href={`https://www.abuseipdb.com/check/${ip}`} label="AbuseIPDB" />
-            <ExternalLink href={`https://www.shodan.io/host/${ip}`} label="Shodan" />
-            <ExternalLink href={`https://ipinfo.io/${ip}`} label="IPInfo" />
-          </div>
-        </div>
-      </section>
-
-      <section className="card footer-note">
-        <h3>Investigation Workflow</h3>
-        <ol>
-          <li>Start with username and email pivots.</li>
-          <li>Correlate domain + certificate trails.</li>
-          <li>Enrich infrastructure with IP reputation.</li>
-          <li>Document findings with source timestamps.</li>
-        </ol>
       </section>
     </main>
   );

@@ -1,43 +1,32 @@
 # MRK OSINT Web Suite
 
-A React + Vite based **OSINT investigation dashboard** with practical pivots for:
-- Username footprinting
-- Domain reconnaissance
-- Email intelligence
-- Phone lookup pivots
-- IP reputation and infrastructure checks
+A React + Vite **OSINT tool website** with one-screen pivots for real investigation workflows.
 
-> ⚠️ For ethical and legal use only. Always obtain permission before investigating a target.
+## Features
 
-## Quick start
+- Username footprint module with generated variants and multi-platform pivots (GitHub, X, Instagram, TikTok, Reddit, Telegram)
+- Domain recon links (WHOIS, DNS, crt.sh, Wayback, VirusTotal, SecurityTrails)
+- Email intelligence links (HIBP, EmailRep, Hunter, Gravatar)
+- Phone intelligence links (Truecaller, Sync.me, WhatsApp check)
+- IP intelligence links (AbuseIPDB, Shodan, IPInfo, Censys)
+- Built-in **Case Notes** box with copy + clear actions for reporting
+- Mobile-friendly dark UI
+
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open: `http://localhost:5173`
+App URL: `http://localhost:5173`
 
-## Built-in modules
+## Build
 
-1. **Username Footprint**
-   - Generates multiple handle variants
-   - One-click GitHub pivots for each variant
+```bash
+npm run build
+```
 
-2. **Domain Recon**
-   - WHOIS, DNS, crt.sh, Wayback and VirusTotal quick links
+## Important
 
-3. **Email Intelligence**
-   - Breach-check, Gravatar, and verifier pivots
-
-4. **Phone Intel**
-   - Truecaller / Sync.me quick pivots
-
-5. **IP Intelligence**
-   - AbuseIPDB, Shodan and IPInfo quick pivots
-
-## Tech stack
-
-- React 18
-- Vite 5
-- Plain CSS (dark cyber-style UI)
+This tool is for legal and authorized OSINT work only. Always follow local law, platform terms, and privacy rules.
